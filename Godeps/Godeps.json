@@ -1,0 +1,6 @@
+{
+	"ImportPath": "obligcloud2",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v79",
+	"Deps": []
+}
