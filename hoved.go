@@ -223,7 +223,7 @@ func handlerEx(res http.ResponseWriter, req *http.Request) {
 
 	ting := mux.Vars(req)
 	webshit := mongoWebhooks.Get(ting["ID"])
-	res.WriteHeader(http.StatusOK)
+	res.WriteHeader(http.StatusCreated)
 	fmt.Fprint(res, webshit)
 }
 
@@ -231,7 +231,7 @@ func handlerEx(res http.ResponseWriter, req *http.Request) {
 func handlerDel(res http.ResponseWriter, req *http.Request) {
 	ting := mux.Vars(req)
 	mongoWebhooks.Delete(ting["ID"])
-	res.WriteHeader(http.StatusOK)
+	res.WriteHeader(http.StatusCreated)
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -240,7 +240,7 @@ func handlerAver(res http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&webhook)
 	if err != nil {
-		res.WriteHeader(http.StatusMethodNotAllowed)
+		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	session, err := mgo.Dial(mongoRates.DatabaseURL)
@@ -250,7 +250,7 @@ func handlerAver(res http.ResponseWriter, req *http.Request) {
 	var rates []FromFixer
 	err = session.DB(mongoRates.DatabaseName).C(mongoRates.MongoCollection).Find(nil).Sort("-_id").Limit(7).All(&rates)
 	if err != nil {
-		fmt.Print("Things are not right")
+		panic(err)
 	}
 	var days float32 = 0
 	for _, rate := range rates {
