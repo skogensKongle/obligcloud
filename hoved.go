@@ -81,7 +81,7 @@ func main() {
 
 //----------------------------------------------------------------------------------------
 func (db *Mongo) Init() {
-	session, err := mgo.Dial(db.DatabaseName)
+	session, err := mgo.Dial(db.DatabaseURL)
 	if err != nil {
 		panic(err)
 	}
@@ -91,7 +91,7 @@ func (db *Mongo) Init() {
 //---------------------------------------------------------------------------------------
 //count DB
 func (db *Mongo) Count() int {
-	session, err := mgo.Dial(db.DatabaseName)
+	session, err := mgo.Dial(db.DatabaseURL)
 	if err != nil {
 		panic(err)
 	}
