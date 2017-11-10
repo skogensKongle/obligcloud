@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -46,8 +47,11 @@ type Exsisting struct {
 	Maxtriggervalue float32       `json:"maxTriggerValue"`
 }
 
-var mongoRates = Mongo{DatabaseURL: "127.0.0.1", DatabaseName: "oblig2", MongoCollection: "rates"}
-var mongoWebhooks = Mongo{DatabaseURL: "127.0.0.1", DatabaseName: "oblig2", MongoCollection: "webhooks"}
+//var mongoRates = Mongo{DatabaseURL: "127.0.0.1", DatabaseName: "oblig2", MongoCollection: "rates"}
+//var mongoWebhooks = Mongo{DatabaseURL: "127.0.0.1", DatabaseName: "oblig2", MongoCollection: "webhooks"}
+
+var mongoRates = Mongo{DatabaseURL: "mongodb://stisoe:1234@ds149855.mlab.com:49855/cloudoblig2", DatabaseName: "cloudoblig2", MongoCollection: "rates"}
+var mongoWebhooks = Mongo{DatabaseURL: "mongodb://stisoe:1234@ds149855.mlab.com:49855/cloudoblig2", DatabaseName: "cloudoblig2", MongoCollection: "webhooks"}
 
 //--------------------------------------------------------------------------------------
 func main() {
@@ -159,7 +163,17 @@ func checkRates(db *Mongo, dc *Mongo) {
 
 	for _, webhook := range webhooks {
 		if notInInterval(webhook, rates) {
-			fmt.Print("+++TODO+++")
+			var exs Exsisting
+			exs.ID = webhook.ID
+			exs.Basecurrency = rates.Base
+			exs.Targetcurrency = webhook.Targetcurrency
+			exs.Currentrate = float32(1 / rates.Rates[webhook.Targetcurrency])
+			exs.Mintriggervalue = webhook.Mintriggervalue
+			exs.Maxtriggervalue = webhook.Maxtriggervalue
+			var url string = "https://discordapp.com/api/webhooks/378503095576952842/1tmdzZmVLBHN8DRyGOBHk1N4NTzHR9QaXjzC6eacFYGR7ATsTpeKe4WwQx9S8ZUz6jCK"
+			jsonValue, _ := json.Marshal(exs)
+			http.Post(url, "application/json", bytes.NewBuffer(jsonValue))
+
 		}
 	}
 
