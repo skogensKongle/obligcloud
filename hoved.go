@@ -46,9 +46,11 @@ type Exsisting struct {
 	Maxtriggervalue float32       `json:"maxTriggerValue"`
 }
 
+//just for local testing
 //var mongoRates = Mongo{DatabaseURL: "127.0.0.1", DatabaseName: "oblig2", MongoCollection: "rates"}
 //var mongoWebhooks = Mongo{DatabaseURL: "127.0.0.1", DatabaseName: "oblig2", MongoCollection: "webhooks"}
 
+//The real shit
 var mongoRates = Mongo{DatabaseURL: "mongodb://stisoe:1234@ds149855.mlab.com:49855/cloudoblig2", DatabaseName: "cloudoblig2", MongoCollection: "rates"}
 var mongoWebhooks = Mongo{DatabaseURL: "mongodb://stisoe:1234@ds149855.mlab.com:49855/cloudoblig2", DatabaseName: "cloudoblig2", MongoCollection: "webhooks"}
 
