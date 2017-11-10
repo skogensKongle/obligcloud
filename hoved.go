@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2"
@@ -72,8 +71,8 @@ func main() {
 	router.HandleFunc("/average", handlerAver).Methods("POST")
 
 	fmt.Println("listening...")
-	err := http.ListenAndServe(":"+os.Getenv("PORT"), router)
-	//err := http.ListenAndServe(":3000", router)
+	//err := http.ListenAndServe(":"+os.Getenv("PORT"), router)
+	err := http.ListenAndServe(":3000", router)
 	if err != nil {
 		panic(err)
 	}
