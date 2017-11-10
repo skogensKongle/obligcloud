@@ -62,6 +62,7 @@ func main() {
 	cron.AddFunc("@daily", func() {
 		getRates(&mongoRates)
 		checkRates(&mongoRates, &mongoWebhooks)
+		fmt.Print("Doing daylies...")
 	})
 	cron.Start()
 	//---------------------------------------------------------------------
@@ -71,37 +72,10 @@ func main() {
 	router.HandleFunc("/average", handlerAver).Methods("POST")
 
 	fmt.Println("listening...")
-	//err := http.ListenAndServe(":"+os.Getenv("PORT"), router)
 	err := http.ListenAndServe(":3000", router)
 	if err != nil {
 		panic(err)
 	}
-}
-
-//----------------------------------------------------------------------------------------
-func (db *Mongo) Init() {
-	session, err := mgo.Dial(db.DatabaseURL)
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
-}
-
-//---------------------------------------------------------------------------------------
-//count DB
-func (db *Mongo) Count() int {
-	session, err := mgo.Dial(db.DatabaseURL)
-	if err != nil {
-		panic(err)
-	}
-
-	//Handle to DB
-	count, err := session.DB(db.DatabaseName).C(db.MongoCollection).Count()
-	if err != nil {
-		fmt.Printf("Error in Count(): %v", err.Error())
-		return -1
-	}
-	return count
 }
 
 //----------------------------------------------------------------------------------------
@@ -154,7 +128,7 @@ func checkRates(db *Mongo, dc *Mongo) {
 	var rates FromFixer
 	err = session.DB(db.DatabaseName).C(db.MongoCollection).Find(nil).Sort("-_id").One(&rates)
 	if err != nil {
-		fmt.Print("Things are not right")
+		fmt.Print("Something wrong with rates...")
 	}
 
 	var webhooks []WebHook
@@ -225,7 +199,7 @@ func getRates(db *Mongo) {
 //----------------------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------------------
-
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 func handlerpost(res http.ResponseWriter, req *http.Request) {
 
 	var webHook WebHook
@@ -242,6 +216,7 @@ func handlerpost(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(res, webHook.ID.Hex())
 }
 
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++
 func handlerEx(res http.ResponseWriter, req *http.Request) {
 
 	ting := mux.Vars(req)
@@ -250,12 +225,14 @@ func handlerEx(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(res, webshit)
 }
 
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++
 func handlerDel(res http.ResponseWriter, req *http.Request) {
 	ting := mux.Vars(req)
 	mongoWebhooks.Delete(ting["ID"])
 	res.WriteHeader(http.StatusOK)
 }
 
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 func handlerAver(res http.ResponseWriter, req *http.Request) {
 	var webhook WebHook
 	decoder := json.NewDecoder(req.Body)
