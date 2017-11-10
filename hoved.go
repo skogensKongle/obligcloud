@@ -208,13 +208,13 @@ func handlerpost(res http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	err := decoder.Decode(&webHook)
 	if err != nil {
-		res.WriteHeader(http.StatusMethodNotAllowed)
+		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	webHook.ID = bson.NewObjectId()
 	mongoWebhooks.add(webHook)
 	//Returne response code
-	res.WriteHeader(http.StatusOK)
+	res.WriteHeader(http.StatusCreated)
 	fmt.Fprintln(res, webHook.ID.Hex())
 }
 
