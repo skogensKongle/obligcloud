@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"gopkg.in/mgo.v2"
@@ -25,6 +26,14 @@ type FromFixer struct {
 	Base  string             `json:"base"`
 	Date  string             `json:"date"`
 	Rates map[string]float32 `json:"rates"`
+}
+
+type Ticket struct {
+	Webhookurl      string  `json:"webhookURL"`
+	Basecurrency    string  `json:"baseCurrency"`
+	Targetcurrency  string  `json:"targetCurrency"`
+	Mintriggervalue float32 `json:"minTriggerValue"`
+	Maxtriggervalue float32 `json:"maxTriggerValue"`
 }
 
 //Storing info given by user
@@ -73,8 +82,10 @@ func main() {
 	router.HandleFunc("/{ID}", handlerDel).Methods("DELETE")
 	router.HandleFunc("/average", handlerAver).Methods("POST")
 
+	http.Handle("/", router)
 	fmt.Println("listening...")
-	err := http.ListenAndServe(":3000", router)
+	//err := http.ListenAndServe(":3000", router)
+	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -204,13 +215,19 @@ func getRates(db *Mongo) {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 func handlerpost(res http.ResponseWriter, req *http.Request) {
 
+	var tickets Ticket
 	var webHook WebHook
 	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&webHook)
+	err := decoder.Decode(&tickets)
 	if err != nil {
 		res.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	webHook.Webhookurl = tickets.Webhookurl
+	webHook.Basecurrency = tickets.Basecurrency
+	webHook.Targetcurrency = tickets.Targetcurrency
+	webHook.Mintriggervalue = tickets.Mintriggervalue
+	webHook.Maxtriggervalue = tickets.Maxtriggervalue
 	webHook.ID = bson.NewObjectId()
 	mongoWebhooks.add(webHook)
 	//Returne response code
