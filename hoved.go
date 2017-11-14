@@ -92,6 +92,31 @@ func main() {
 }
 
 //----------------------------------------------------------------------------------------
+func (db *Mongo) Init() {
+	session, err := mgo.Dial(db.DatabaseURL)
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+}
+
+//----------------------------------------------------------------------------------------
+func (db *Mongo) Count() int {
+	session, err := mgo.Dial(db.DatabaseURL)
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	count, err := session.DB(db.DatabaseName).C(db.MongoCollection).Count()
+	if err != nil {
+		fmt.Printf("error in Count(): %v", err.Error())
+		return -1
+	}
+	return count
+}
+
+//----------------------------------------------------------------------------------------
 func (db *Mongo) add(new WebHook) {
 	session, err := mgo.Dial(db.DatabaseURL)
 	if err != nil {
@@ -105,7 +130,7 @@ func (db *Mongo) add(new WebHook) {
 }
 
 //-----------------------------------------------------------------------------------------
-func (db *Mongo) Get(keyID string) WebHook {
+func (db *Mongo) get(keyID string) WebHook {
 	session, err := mgo.Dial(db.DatabaseURL)
 	if err != nil {
 		panic(err)
@@ -113,7 +138,7 @@ func (db *Mongo) Get(keyID string) WebHook {
 	defer session.Close()
 
 	webhook := WebHook{}
-	err = session.DB(db.DatabaseName).C(db.MongoCollection).Find(bson.M{"_id": bson.ObjectIdHex(keyID)}).One(&webhook)
+	err = session.DB(db.DatabaseName).C(db.MongoCollection).Find(bson.M{"_id": bson.ObjectId(keyID)}).One(&webhook)
 	if err != nil {
 		return webhook
 	}
@@ -121,14 +146,14 @@ func (db *Mongo) Get(keyID string) WebHook {
 }
 
 //---------------------------------------------------------------------------------------
-func (db *Mongo) Delete(keyID string) {
+func (db *Mongo) delete(keyID string) {
 	session, err := mgo.Dial(db.DatabaseURL)
 	if err != nil {
 		panic(err)
 	}
 	defer session.Close()
 
-	session.DB(db.DatabaseName).C(db.MongoCollection).RemoveId(bson.ObjectIdHex(keyID))
+	session.DB(db.DatabaseName).C(db.MongoCollection).RemoveId(bson.ObjectId(keyID))
 }
 
 //---------------------------------------------------------------------------------------
@@ -237,9 +262,8 @@ func handlerpost(res http.ResponseWriter, req *http.Request) {
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++
 func handlerEx(res http.ResponseWriter, req *http.Request) {
-
 	ting := mux.Vars(req)
-	webshit := mongoWebhooks.Get(ting["ID"])
+	webshit := mongoWebhooks.get(ting["ID"])
 	res.WriteHeader(http.StatusCreated)
 	fmt.Fprint(res, webshit)
 }
@@ -247,7 +271,7 @@ func handlerEx(res http.ResponseWriter, req *http.Request) {
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++
 func handlerDel(res http.ResponseWriter, req *http.Request) {
 	ting := mux.Vars(req)
-	mongoWebhooks.Delete(ting["ID"])
+	mongoWebhooks.delete(ting["ID"])
 	res.WriteHeader(http.StatusCreated)
 }
 
